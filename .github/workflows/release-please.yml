@@ -1,0 +1,8 @@
+name: Release Please
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+jobs:
+  call:
+    uses: forkwright/.github/.github/workflows/release-please.yml@main

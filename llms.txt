@@ -1,0 +1,16 @@
+# pinax
+
+> Relational storage engine for the forkwright fleet - design phase, no code yet.
+
+## Architecture
+
+Structured corpus:
+- [_llm/architecture.toml](_llm/architecture.toml): planned layers
+- [_llm/current_state.toml](_llm/current_state.toml): current phase
+- [_llm/decisions.toml](_llm/decisions.toml): locked decisions
+
+## Agent entry points
+
+- [README.md](README.md)
+- [CLAUDE.md](CLAUDE.md)
+- [AGENTS.md](AGENTS.md)

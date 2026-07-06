@@ -1,0 +1,8 @@
+[meta]
+name = "pinax"
+repo = "forkwright/pinax"
+generated = false
+
+[architecture]
+summary = "Planned layering: pager/buffer-pool -> B-tree -> WAL/transactions -> MVCC -> SQL parser/planner/executor -> indexes -> encryption -> changelog emission -> async surface."
+status = "design phase; no crates exist yet"

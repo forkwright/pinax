@@ -1,0 +1,33 @@
+# archetype: B
+# forge-only: false
+# spdx: LicenseRef-PolyForm-Shield-1.0.0
+
+# Pinax CI pipeline.
+#
+# Pinax is docs-only today (design phase) - no Cargo.toml, no
+# crates, nothing for the default Rust gate to exercise. The docs-phase
+# gate keeps CI honest with real checks that do not require a Rust
+# workspace: lint this CI file and the public README.
+#
+# The workspace lands at Phase 01 (pager / buffer pool / B-tree).
+# When code lands, replace `pipeline.stages` with the full Rust gate:
+#
+#     stages = ["cargo fmt", "cargo check", "cargo clippy", "cargo nextest", "kanon lint"]
+
+[pipeline]
+stages = ["ci-config-lint", "readme-lint"]
+
+[stages.ci-config-lint]
+cmd = "kanon lint --workflow .kanon-ci.toml"
+timeout_secs = 30
+
+[stages.readme-lint]
+cmd = "kanon lint --writing README.md"
+timeout_secs = 30
+
+# WHY disabled: the independent verifier's default build probe
+# (`cargo check --all-features --tests`) fails structurally against a
+# repo with no Cargo workspace and reports a false divergence.
+# Re-enable when the pipeline grows real Rust stages to reproduce.
+[verifier]
+enabled = false

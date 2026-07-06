@@ -1,0 +1,14 @@
+/target
+/instance
+*.swp
+*.swo
+*~
+.DS_Store
+.env
+.env.*
+!.env.example
+.idea/
+.vscode/
+*.log
+target/
+*.bak

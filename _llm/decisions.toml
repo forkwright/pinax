@@ -1,0 +1,32 @@
+[meta]
+name = "pinax"
+repo = "forkwright/pinax"
+generated = false
+
+[[decision]]
+id = "zero-c"
+text = "Ground-up Rust, zero C dependency (no libsqlite3-sys, no bindgen, no cc)."
+
+[[decision]]
+id = "async-first"
+text = "Tokio-native primary surface; sync wraps async."
+
+[[decision]]
+id = "mvcc"
+text = "Multi-writer MVCC from day one."
+
+[[decision]]
+id = "encryption"
+text = "Per-page AEAD encryption core feature; XChaCha20-Poly1305 default; per-tablespace HKDF keys."
+
+[[decision]]
+id = "changelog-primitive"
+text = "Causal-ordered changesets (site_id, lamport_clock) as a storage-layer primitive."
+
+[[decision]]
+id = "strict-typing"
+text = "No type coercion; no SQLite on-disk-format compatibility."
+
+[[decision]]
+id = "index-delegation"
+text = "Vector + FTS index implementations delegated to heurema; pinax owns only the syntax."

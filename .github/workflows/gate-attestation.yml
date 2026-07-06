@@ -1,0 +1,7 @@
+name: Gate Attestation
+on:
+  pull_request:
+    branches: [main]
+jobs:
+  call:
+    uses: forkwright/.github/.github/workflows/gate-attestation.yml@main

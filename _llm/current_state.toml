@@ -1,0 +1,9 @@
+[meta]
+name = "pinax"
+repo = "forkwright/pinax"
+generated = false
+source_docs = ["README.md"]
+
+[state]
+summary = "Design-phase repo; specification is the active phase. Authoritative state tracking lives in the fleet planning home (forkwright/kanon projects/pinax)."
+current_phase = "Phase 0: specification"
