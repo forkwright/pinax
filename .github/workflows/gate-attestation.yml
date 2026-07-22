@@ -1,7 +1,66 @@
+# WHY(kanon#2522): replaces the org-default trailer-only reusable
+# (forkwright/.github/.github/workflows/gate-attestation.yml@main, job id
+# `call`, required context "call / gate-attestation") with the kanon-owned
+# hybrid gate. A trailer-stamped PR still takes the fast path; a
+# trailer-less PR now falls through to full-gate-build instead of nothing.
+#
+# UNVERIFIED / STRUCTURAL RISK: pinax has NO Cargo.toml, NO crates, NO
+# rust-toolchain file (confirmed — this repo is docs-only design-phase per
+# its own .kanon-ci.toml, workspace lands at Phase 01 pager/buffer-pool/
+# B-tree). The with: block below is fleet DEFAULTS, not derived from any
+# real build — there is nothing to derive from. This repo's own
+# .kanon-ci.toml already documents the exact failure mode: "the independent
+# verifier's default build probe (`cargo check --all-features --tests`)
+# fails structurally against a repo with no Cargo workspace" (verifier
+# disabled for that reason). The SAME structural failure applies to
+# full-gate-build's fmt/check/clippy/nextest commands: they will hard-fail
+# ("could not find `Cargo.toml`") the moment they actually run.
+#
+# This only stays survivable because docs_only_exemption (default true)
+# skips full-gate-build entirely when every changed path matches **.md,
+# docs/**, llms.txt, AGENTS.md, or .github/*.md — which is 100% of this
+# repo's PRs to date. The exemption glob does NOT cover .github/*.yml
+# (workflow files, one level down in .github/workflows/, and wrong
+# extension) — so a trailer-less PR that touches this very file, or any
+# future non-doc config, will hit the structural failure above. Mitigation
+# is the fast path (Gate-Passed trailer), not the exemption — the adoption
+# PR for this file must carry a real trailer.
+#
+# rust_toolchain is set explicitly (not left "" for auto-detect) because no
+# rust-toolchain.toml/file exists, per the input's own contract; "stable" is
+# a placeholder ahead of the eventual Rust workspace landing, not a verified
+# value.
+#
+# No ci.yml exists (nothing to double-build-cost against) and no inline
+# ai-attribution logic exists anywhere in this repo's workflows today — this
+# ai_attribution_check is net-new, not a retirement of an existing pattern.
 name: Gate Attestation
+
 on:
   pull_request:
     branches: [main]
+
+permissions:
+  contents: read
+
+# WHY no concurrency: block here: hybrid-gate.yml itself already declares
+# `concurrency: group: ${{ github.workflow }}-${{ github.ref }}` and its own
+# comment states callers must NOT also set a concurrency group with that
+# same key, or the shared group self-cancels.
+
 jobs:
-  call:
-    uses: forkwright/.github/.github/workflows/gate-attestation.yml@main
+  gate:
+    uses: forkwright/.github/.github/workflows/hybrid-gate.yml@main
+    with:
+      rust_toolchain: "stable"
+      fmt_cmd: "cargo fmt --all -- --check"
+      check_cmd: "cargo check --workspace --all-targets"
+      clippy_cmd: "cargo clippy --workspace --all-targets -- -D warnings"
+      nextest_cmd: "cargo nextest run --workspace"
+      doctest_cmd: ""
+      system_packages: ""
+      needs_fleet_repo_token: false
+      rust_cache_key: "gate-attestation"
+      ai_attribution_check: true
+      docs_only_exemption: true
+    secrets: inherit
