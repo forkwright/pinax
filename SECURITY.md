@@ -8,7 +8,7 @@ Expected response: acknowledgement within 72 hours. No bug bounty program.
 
 ## Scope
 
-Dioptron is in the design phase. No implementation code has landed. Security reports on the design itself (threat model gaps, missing requirements, unsafe architectural choices) are in scope and welcome.
+Pinax is in the design phase. No implementation code has landed. Security reports on the design itself (threat model gaps, missing requirements, unsafe architectural choices) are in scope and welcome.
 
 ## Disclosure
 
