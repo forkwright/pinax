@@ -1,7 +1,21 @@
 name: Gate Attestation
+
 on:
   pull_request:
     branches: [main]
+
+# WHY: the reusable declares `contents: read` for its own job, but the caller
+# controls the token the reusable receives. Declaring it here keeps the grant
+# explicit at the boundary that actually decides it.
+permissions:
+  contents: read
+
+# WHY: the reusable declares no concurrency group, so without this a rapid
+# re-push leaves the superseded run to completion against a SHA nothing checks.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   call:
     uses: forkwright/.github/.github/workflows/gate-attestation.yml@main

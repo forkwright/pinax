@@ -7,19 +7,28 @@
 # Pinax is docs-only today (design phase) - no Cargo.toml, no
 # crates, nothing for the default Rust gate to exercise. The docs-phase
 # gate keeps CI honest with real checks that do not require a Rust
-# workspace: lint this CI file and the public README.
+# workspace: the canonical whole-repository lint, plus the README
+# writing check on top of it.
 #
 # The workspace lands at Phase 01 (pager / buffer pool / B-tree).
 # When code lands, replace `pipeline.stages` with the full Rust gate:
 #
 #     stages = ["cargo fmt", "cargo check", "cargo clippy", "cargo nextest", "kanon lint"]
 
+# WHY(#1) `kanon lint .` and not the two scoped commands it replaces: the
+# pipeline previously ran `kanon lint --workflow .kanon-ci.toml` and
+# `kanon lint --writing README.md`, which certified this file and the README
+# and nothing else. The gate reported PASS while `kanon lint .` reported
+# violations in AGENTS.md, CLAUDE.md and the workflow — it sampled the files
+# least likely to have drifted and excluded the ones that had. The
+# whole-repo lint subsumes the workflow check; the README writing check stays
+# because `--writing` applies prose rules the default pass does not.
 [pipeline]
-stages = ["ci-config-lint", "readme-lint"]
+stages = ["repo-lint", "readme-lint"]
 
-[stages.ci-config-lint]
-cmd = "kanon lint --workflow .kanon-ci.toml"
-timeout_secs = 30
+[stages.repo-lint]
+cmd = "kanon lint ."
+timeout_secs = 120
 
 [stages.readme-lint]
 cmd = "kanon lint --writing README.md"

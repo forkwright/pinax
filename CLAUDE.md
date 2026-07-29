@@ -1,3 +1,9 @@
+<!--
+scope: pinax repo conventions (design-phase relational storage engine; workspace lands with Phase 01)
+defers_to: kanon standards for universal engineering policy
+tightens: design-phase-only until Phase 01 (pager / buffer pool / B-tree); planning lives in kanon projects/pinax, not here
+-->
+
 # CLAUDE.md - pinax
 
 ## At a glance
