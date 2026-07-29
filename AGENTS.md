@@ -1,5 +1,7 @@
 ---
 scope: pinax repo conventions (design-phase relational storage engine)
+defers_to: kanon standards for universal engineering policy
+tightens: design-phase-only: no crates land ahead of the Phase 01 plan
 ---
 
 # AGENTS.md - pinax
