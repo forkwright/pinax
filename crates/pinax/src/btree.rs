@@ -517,11 +517,9 @@ fn apply_result_to_interior(
     }
 }
 
-/// A conservative cap on how many separator keys fit on one interior page,
-/// used only to decide "definitely try building it and check `free_space`"
-/// versus "definitely split" — the real bound is `free_space`, checked by
-/// `build_interior_page` failing would only happen if this were wrong, so
-/// this function stays a cheap pre-filter.
+/// The exact number of fixed-size separator-key cells that fit on one
+/// otherwise-empty interior page: `(usable_space - header) / (cell +
+/// pointer)`, matching how `free_space` accounts for the same page.
 fn max_interior_entries(page_size: usize) -> usize {
     let usable = page_size.saturating_sub(8);
     let per_cell = INTERIOR_CELL_LEN + POINTER_LEN;
