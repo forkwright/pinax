@@ -31,6 +31,16 @@ proptest = "1"
 # lets ARCHITECTURE/crate-index-conformance read real `path =` edges out of
 # each crate's Cargo.toml and cross-check them against CRATE-INDEX.toml.
 snafu = "0.8"
+# WHY: pinax's page-format checksum per PLAN.md Decision 2 — pure-Rust
+# XxHash3-64, the same algorithm Turso's page cache uses
+# (`turso/core/storage/checksum.rs:81`), chosen over CRC32C (32-bit is
+# collision-borderline at millions of pages) and blake3 (256-bit dominates a
+# 4 KiB page's overhead budget; cryptographic integrity is the encryption
+# layer's job, not corruption detection's).
+xxhash-rust = { version = "0.8", features = ["xxh3"] }
+# WHY: fixture temp-dirs for pager/buffer-pool/B-tree tests — kanon RUST.md
+# § Testing forbids `/tmp/<literal>` and `.parent()` off a tempdir.
+tempfile = "3"
 
 [workspace.lints.clippy]
 pedantic = { level = "warn", priority = -1 }

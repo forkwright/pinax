@@ -7,7 +7,7 @@ license.workspace = true
 homepage.workspace = true
 repository.workspace = true
 authors.workspace = true
-description = "(scaffold) Relational storage facade for the forkwright fleet: pager, buffer pool, B-tree, SQL surface, async API, migrations, and CLI."
+description = "Relational storage facade for the forkwright fleet: page format, pager, buffer pool, and B+tree land Phase 01; SQL surface, async API, migrations, and CLI land later phases."
 readme = "../../README.md"
 keywords = ["sql", "database", "storage"]
 categories = ["database"]
@@ -16,17 +16,23 @@ categories = ["database"]
 hypomnema = { path = "../hypomnema", version = "0.0.2" }
 lexis = { path = "../lexis", version = "0.0.2" }
 phylaxis = { path = "../phylaxis", version = "0.0.2" }
+snafu = { workspace = true }
+xxhash-rust = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }
 
 [lints]
 workspace = true
 
 # WHY: maturity flag is read by the kanon substrate registry so consumers can
-# tell at a glance which API surfaces are pre-stabilization. This crate is an
-# empty scaffold reserving the facade's position in the Decision 14
-# dependency graph; the pager + buffer pool + B-tree land Phase 01.
+# tell at a glance which API surfaces are pre-stabilization. Phase 01 lands
+# the page format, pager, buffer pool, and B+tree (Decision 1, Decision 2,
+# Decision 14); the SQL surface, async API, migration runner, and CLI are
+# later phases per ROADMAP.md.
 [package.metadata.kanon]
-maturity = "scaffold"
+maturity = "alpha"
 since = "2026-08-15"
 phase = "1"
-phase-description = "empty crate reserving the workspace position and dependency edges; no implementation yet"
-exit-criteria = "Phase 1 pager + buffer pool + B-tree land; see kanon/projects/pinax/ROADMAP.md Phase 01"
+phase-description = "page format (checksummed, configurable 4-64 KiB), pager, buffer pool with LRU eviction, and a copy-on-write B+tree keyed by i64 (Decision 1, Decision 2)"
+exit-criteria = "Phase 2 adopts this pager under a WAL + transaction boundary; see kanon/projects/pinax/ROADMAP.md Phase 02"
