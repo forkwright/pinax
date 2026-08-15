@@ -1,0 +1,30 @@
+[package]
+name = "hypomnema"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+authors.workspace = true
+description = "Written-record primitives for pinax: WAL, virtual-WAL trait, and cr-sqlite-shaped causal changelog (not yet implemented)."
+readme = "../../README.md"
+keywords = ["sql", "wal", "changelog"]
+categories = ["data-structures"]
+
+[dependencies]
+lexis = { path = "../lexis", version = "0.0.2" }
+
+[lints]
+workspace = true
+
+# WHY: maturity flag is read by the kanon substrate registry so consumers can
+# tell at a glance which API surfaces are pre-stabilization. This crate is an
+# empty scaffold reserving its position in the Decision 14 dependency graph;
+# the WAL + virtual-WAL trait + changelog land in Phase 02.
+[package.metadata.kanon]
+maturity = "scaffold"
+since = "2026-08-15"
+phase = "2"
+phase-description = "empty crate reserving the workspace position and dependency edge; no implementation yet"
+exit-criteria = "Phase 2 WAL + virtual-WAL trait + causal changelog land; see kanon/projects/pinax/ROADMAP.md Phase 02"

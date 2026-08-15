@@ -1,0 +1,17 @@
+# Nextest configuration for pinax.
+# See: https://nexte.st/book/configuration.html
+
+[profile.default]
+slow-timeout = { period = "60s", terminate-after = 5 }
+
+[profile.ci]
+# WHY no retries in the profile the required gate runs: a retry makes the
+# check non-deterministic in the PASS direction — a test that fails once and
+# passes on retry reports green, so the Gate-Passed trailer attests a result
+# the same commit may not reproduce, and the flake itself is never seen.
+# Flakes are defects to fix, not results to average away.
+retries = 0
+slow-timeout = { period = "60s", terminate-after = 2 }
+
+[profile.ci.junit]
+path = "target/nextest/ci/junit.xml"

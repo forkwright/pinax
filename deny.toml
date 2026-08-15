@@ -1,0 +1,64 @@
+# cargo-deny configuration for pinax.
+#
+# Template copied from forkwright/heurema; the advisory + license + ban +
+# sources policy mirrors the fleet baseline (kanon RUST.md § Dependencies).
+
+[graph]
+targets = []
+all-features = true
+
+[advisories]
+yanked = "deny"
+ignore = []
+
+[licenses]
+allow = [
+    "MPL-2.0",
+    "MIT",
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "Unicode-3.0",
+    "Unicode-DFS-2016",
+    "CC0-1.0",
+    "Zlib",
+]
+confidence-threshold = 0.92
+
+[bans]
+multiple-versions = "warn"
+wildcards = "deny"
+
+[[bans.deny]]
+crate = "openssl-sys"
+reason = "rustls is the fleet TLS choice; openssl-sys pulls system OpenSSL and complicates supply chain"
+
+# WHY: kanon RUST.md bans `thiserror` (replaced by snafu), `async-trait`
+# (native async fn in trait), `lazy_static` / `once_cell` (std::sync::LazyLock),
+# and `failure` (unmaintained). Applies fleet-wide.
+[[bans.deny]]
+crate = "thiserror"
+reason = "fleet errors use snafu (kanon RUST.md)"
+
+[[bans.deny]]
+crate = "async-trait"
+reason = "native async fn in trait since Rust 1.75 (kanon RUST.md)"
+
+[[bans.deny]]
+crate = "lazy_static"
+reason = "std::sync::LazyLock stabilized in 1.80 (kanon RUST.md)"
+
+[[bans.deny]]
+crate = "once_cell"
+reason = "std::sync::LazyLock stabilized in 1.80 (kanon RUST.md)"
+
+[[bans.deny]]
+crate = "failure"
+reason = "abandoned since 2019; use snafu (kanon RUST.md)"
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]

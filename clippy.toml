@@ -1,0 +1,16 @@
+# Workspace-wide clippy configuration for pinax.
+
+too-many-arguments-threshold = 8
+
+# WHY: acronyms that appear unquoted in rustdoc. Extend as later phases
+# (WAL, MVCC, AEAD, HNSW, BM25, ...) land real code.
+doc-valid-idents = [
+    "DDL",
+    "AST",
+    "SQL",
+    "UTC",
+]
+
+[[disallowed-methods]]
+path = "std::process::exit"
+reason = "library crate — exit() bypasses destructors and consumer error handling"
