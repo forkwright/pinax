@@ -151,8 +151,9 @@ impl Database {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use lexis::Value;
+
+    use super::*;
 
     fn row(n: i64) -> Row {
         Row::new(vec![Value::Integer(n)])

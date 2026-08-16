@@ -9,7 +9,7 @@ in Rust. The Tier-1 storage primitive: the answer to "what is." Replaces
 SQLite for fleet consumers whose state is tabular, transactional, and
 aggregation-heavy.
 
-**Status:** Phase 01 (pager / buffer pool / B-tree) implemented — a
+**Status:** Phase 01 (pager / buffer pool / B-tree) implemented - a
 checksummed, copy-on-write, integer-keyed B+tree behind an LRU-evicting
 buffer pool. The phased roadmap and state tracking live in the fleet
 planning home; `lexis` (the strict six-type value system) landed first,

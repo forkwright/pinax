@@ -78,11 +78,12 @@ fn open_a_file_and_crud_rows_by_integer_key() {
 ///
 /// Simulates a crash by writing committed data, then dropping the
 /// `Database` WITHOUT any explicit close/shutdown call (Rust has none to
-/// skip — a `Database` going out of scope with no flush step beyond what
-/// each committed operation already durably wrote IS the crash model: the
-/// process simply stops). Every already-committed insert must still be
-/// there on reopen; nothing partial from an interrupted operation should
-/// surface, because no operation was left in flight.
+/// skip — a `Database` binding being dropped at the end of its lexical
+/// lifetime, with no flush step beyond what each committed operation
+/// already durably wrote, IS the crash model: the process simply stops).
+/// Every already-committed insert must still be there on reopen; nothing
+/// partial from an interrupted operation should surface, because no
+/// operation was left in flight.
 #[test]
 fn survives_crash_and_reopen() {
     let dir = tempfile::tempdir().expect("tempdir");
