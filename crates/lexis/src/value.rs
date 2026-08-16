@@ -191,12 +191,13 @@ impl From<DateTimeValue> for Value {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     // WHY explicit: `.prop_filter(...)` below is a `Strategy` trait method
     // called via dot-syntax, which requires the trait in scope even though
     // every other proptest item here is called through a fully-qualified
     // path.
     use proptest::strategy::Strategy as _;
+
+    use super::*;
 
     #[test]
     fn real_value_accepts_finite() {

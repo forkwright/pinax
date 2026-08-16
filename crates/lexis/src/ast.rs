@@ -160,7 +160,12 @@ mod tests {
                 ColumnName::try_from("id").expect("valid identifier"),
             ))
         };
-        assert_eq!(Expr::IsNull(column()), Expr::IsNull(column()));
+        // WHY two named bindings: verifies two independently-constructed
+        // `IsNull` values over equal operands compare equal by structure
+        // (derived `PartialEq`), not by pointer identity.
+        let left = Expr::IsNull(column());
+        let right = Expr::IsNull(column());
+        assert_eq!(left, right);
         assert_ne!(Expr::IsNull(column()), Expr::IsNotNull(column()));
     }
 }

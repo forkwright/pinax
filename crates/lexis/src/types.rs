@@ -163,7 +163,7 @@ mod tests {
 
         #[test]
         fn check_comparable_always_accepts_identical_types(sql_type in any_sql_type()) {
-            proptest::prop_assert!(sql_type.check_comparable(sql_type).is_ok());
+            proptest::prop_assert_eq!(sql_type.check_comparable(sql_type).is_ok(), true);
         }
     }
 }

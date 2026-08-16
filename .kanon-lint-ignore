@@ -1,0 +1,50 @@
+# Rules to skip for specific paths
+# Format: RULE/name:path/glob
+
+# =============================================================================
+# crates/lexis/ — false positives, not real defects
+# =============================================================================
+
+# WHY: lexis's lib.rs is a module-declaration + public re-export file with no
+# behavior of its own; its 41 tests live in the schema.rs and types.rs
+# submodules (#[cfg(test)] mod tests, plus proptest properties). The
+# TESTING/no-tests heuristic only inspects lib.rs itself and a sibling
+# tests/ directory, so it cannot see submodule test coverage. Same
+# false-positive shape and same fix as the existing
+# TESTING/no-tests:crates/mnemosyne/src/lib.rs entry in kanon's own
+# .kanon-lint-ignore.
+TESTING/no-tests:crates/lexis/src/lib.rs
+
+# WHY(forkwright/kanon#2975): STORAGE/no-migration-checksum's has_ddl check
+# is a bare substring match for CREATE/ALTER/DROP TABLE with no requirement
+# that the keyword be co-located with an execution call or migration
+# runner — unlike has_migration_runner, which requires an actual
+# function/module identifier (kanon#1040 B7 narrowed that path specifically
+# to avoid firing on bare-word mentions in doc-comment prose, but has_ddl
+# never received the same treatment). Both lexis files here are pure
+# type-vocabulary code (#![forbid(unsafe_code)], no DB connection, no SQL
+# execution) whose module doc comments explicitly name "CREATE TABLE" as
+# one of the future statement types the crate does NOT implement. Evidence
+# posted to kanon#2975; drop this entry once that rule fix lands.
+STORAGE/no-migration-checksum:crates/lexis/src/ast.rs
+STORAGE/no-migration-checksum:crates/lexis/src/lib.rs
+
+# =============================================================================
+# crates/{hypomnema,phylaxis,pinax}/ — genuinely empty scaffolds
+# =============================================================================
+
+# WHY: these three crates are empty by design at this phase — lib.rs is
+# module-doc-comment-only, zero functions, zero types, zero logic (see each
+# crate's [package.metadata.kanon] maturity = "scaffold" in Cargo.toml). A
+# #[cfg(test)] module here would have no real behavior to assert against;
+# writing one anyway would itself be a tautological/vacuous test (the
+# TESTING/tautological-test class this same lint run flags elsewhere), which
+# is worse than an honest, exit-criteria-bound suppression. Each crate's own
+# Cargo.toml exit-criteria field names the concrete Phase that ends this:
+# hypomnema Phase 02 (WAL + virtual-WAL trait + causal changelog), phylaxis
+# Phase 03/06 (MVCC + encryption), pinax Phase 01 (pager + buffer pool +
+# B-tree) — see kanon/projects/pinax/ROADMAP.md. Drop each entry the moment
+# its crate gets real behavior and a real test.
+TESTING/no-tests:crates/hypomnema/src/lib.rs
+TESTING/no-tests:crates/phylaxis/src/lib.rs
+TESTING/no-tests:crates/pinax/src/lib.rs
