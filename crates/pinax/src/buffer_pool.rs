@@ -201,10 +201,13 @@ mod tests {
 
     #[test]
     fn eviction_flushes_dirty_pages_to_disk() {
+        const CAPACITY: usize = 2;
+        const PAGE_COUNT: usize = 5;
+
         let dir = tempfile::tempdir().expect("tempdir");
-        let mut pool = pool_with_capacity(&dir, 2);
+        let mut pool = pool_with_capacity(&dir, CAPACITY);
         let page_size = pool.page_size().bytes_usize();
-        let ids: Vec<u32> = (0..5).map(|_| pool.allocate_page_id()).collect();
+        let ids: Vec<u32> = (0..PAGE_COUNT).map(|_| pool.allocate_page_id()).collect();
         for &id in &ids {
             let mut buf = vec![0u8; page_size];
             if let Some(b) = buf.first_mut() {
@@ -212,9 +215,19 @@ mod tests {
             }
             pool.put_new(id, buf).expect("put");
         }
-        // Capacity 2 with 5 distinct ids forces at least 3 evictions; every
-        // evicted id must have been durably written, not dropped.
-        for &id in &ids {
+        // `CAPACITY` distinct ids, inserted via `put_new` alone (no `get`
+        // reorders recency), evict strictly in insertion order: the first
+        // `PAGE_COUNT - CAPACITY` ids are pushed out and durably flushed by
+        // `evict_one`; the last `CAPACITY` ids stay resident in the cache,
+        // dirty and NOT yet written — reading THOSE through the pager
+        // directly (bypassing the cache) is exactly what
+        // `get_reads_through_on_cache_miss` and
+        // `commit_persists_new_root_across_reopen` cover elsewhere, and
+        // asserting it here (as an earlier version of this test did) fails
+        // with an out-of-bounds file read rather than proving eviction
+        // flushes anything.
+        let evicted = &ids[..PAGE_COUNT - CAPACITY];
+        for &id in evicted {
             let read_back = pool
                 .pager
                 .read_data_page(id)

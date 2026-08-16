@@ -173,6 +173,19 @@ impl Pager {
         file.write_all_at(&slot, 0).context(IoSnafu {
             path: path.to_path_buf(),
         })?;
+        // WHY `set_len` to the full meta region: only slot A (the first
+        // `META_SLOT_LEN` bytes) was just written, so the file is only
+        // `META_SLOT_LEN` bytes long — one slot short of `open`'s own
+        // `actual_len >= META_REGION_LEN` precondition, which it must
+        // check before reading slot B at all. Extending (never truncating,
+        // since the file is currently shorter) reserves slot B's region as
+        // a zero-filled hole; it deliberately does NOT verify a checksum,
+        // so `open`'s existing `decode_meta_slot`/`verify_checksum` path
+        // correctly reads it back as "not a valid slot" and falls back to
+        // slot A — the same fallback a corrupted slot B takes.
+        file.set_len(META_REGION_LEN).context(IoSnafu {
+            path: path.to_path_buf(),
+        })?;
         file.sync_all().context(IoSnafu {
             path: path.to_path_buf(),
         })?;
@@ -531,6 +544,7 @@ mod tests {
         }
         // Corrupt slot 1 (the currently-active slot) directly.
         let file = OpenOptions::new()
+            .read(true)
             .write(true)
             .open(&path)
             .expect("open for corruption");

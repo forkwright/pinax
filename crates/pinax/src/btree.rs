@@ -290,21 +290,32 @@ fn write_overflow_chain(pool: &mut BufferPool, tail: &[u8]) -> Result<u32, Pinax
         return Ok(0);
     }
     let chunk_cap = overflow_chunk_cap(pool.page_size().bytes());
+    // WHY chunked forward (remainder last), not backward: `read_overflow_chain`
+    // reads `remaining_needed.min(chunk_cap)` per page and relies on every
+    // page but the LAST holding a full `chunk_cap` bytes — that invariant
+    // only holds if the possibly-short remainder chunk is the tail-end
+    // chunk in byte order, matching how a chunk_cap-then-remainder split
+    // naturally falls out of walking `tail` front-to-back.
     let mut chunks: Vec<&[u8]> = Vec::new();
-    let mut end = tail.len();
-    while end > 0 {
-        let start = end.saturating_sub(chunk_cap);
+    let mut start = 0usize;
+    while start < tail.len() {
+        let end = (start + chunk_cap).min(tail.len());
         let chunk = tail.get(start..end).context(BufferBoundsSnafu {
             at: start,
             len: end - start,
             buf_len: tail.len(),
         })?;
         chunks.push(chunk);
-        end = start;
+        start = end;
     }
 
+    // Link the chain tail-to-head: write the LAST natural chunk (the
+    // remainder) first with `next = 0`, and each earlier chunk after it
+    // pointing at the page just written — so the final `next_id`, returned
+    // as `overflow_first`, is the page holding `tail[0..chunk_cap]`, and
+    // reading forward from it visits every chunk in original byte order.
     let mut next_id = 0u32;
-    for chunk in chunks {
+    for chunk in chunks.into_iter().rev() {
         let mut buf = vec![0u8; pool.page_size().bytes_usize()];
         write_u8(&mut buf, 0, PAGE_TYPE_OVERFLOW)?;
         write_u32(&mut buf, 1, next_id)?;
