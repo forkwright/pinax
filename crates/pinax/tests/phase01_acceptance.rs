@@ -11,6 +11,22 @@
 //! criteria stay traceable as a named, standalone set rather than
 //! scattered evidence a reader has to reassemble from module-level tests.
 
+// WHY `expect`/`expect_err` throughout rather than `?`: this file is a
+// separate crate root (every file under `tests/` is), so it does not
+// inherit `lib.rs`'s `#![cfg_attr(test, allow(clippy::unwrap_used,
+// clippy::expect_used))]` escape that covers colocated `#[cfg(test)] mod
+// tests` blocks. The workspace `[workspace.lints.clippy]` already sets
+// `expect_used` to "warn", not "deny", specifically because "tests
+// legitimately use these" (`Cargo.toml`) — this crate-level `expect`
+// restates that same intent at the one scope the gate's `-D warnings`
+// cannot see through. `unwrap_used` is not listed: this file has no bare
+// `.unwrap()` call, and an expectation nothing fires against is itself a
+// gate error (`unfulfilled_lint_expectations`).
+#![expect(
+    clippy::expect_used,
+    reason = "acceptance tests use expect/expect_err as the intended failure mode, matching every other test surface in this workspace"
+)]
+
 use std::fs::OpenOptions;
 use std::os::unix::fs::FileExt as _;
 
@@ -34,8 +50,8 @@ fn open_a_file_and_crud_rows_by_integer_key() {
     let mut db = Database::create(&path, PageSize::DEFAULT).expect("open a file");
 
     // Create.
-    db.insert(1, sample_row(1)).expect("create row 1");
-    db.insert(2, sample_row(2)).expect("create row 2");
+    db.insert(1, &sample_row(1)).expect("create row 1");
+    db.insert(2, &sample_row(2)).expect("create row 2");
 
     // Read.
     assert_eq!(db.get(1).expect("read row 1"), Some(sample_row(1)));
@@ -43,7 +59,7 @@ fn open_a_file_and_crud_rows_by_integer_key() {
     assert_eq!(db.get(3).expect("read missing row"), None);
 
     // Update.
-    db.update(1, sample_row(100)).expect("update row 1");
+    db.update(1, &sample_row(100)).expect("update row 1");
     assert_eq!(
         db.get(1).expect("read updated row 1"),
         Some(sample_row(100))
@@ -75,7 +91,7 @@ fn survives_crash_and_reopen() {
     {
         let mut db = Database::create(&path, PageSize::DEFAULT).expect("create");
         for i in 0..50i64 {
-            db.insert(i, sample_row(i)).expect("insert before crash");
+            db.insert(i, &sample_row(i)).expect("insert before crash");
         }
         // No explicit close/shutdown: dropping `db` here models the crash.
         // Every insert above already committed (each `Database::insert`
@@ -104,7 +120,7 @@ fn corruption_is_detected_via_checksum() {
 
     {
         let mut db = Database::create(&path, PageSize::DEFAULT).expect("create");
-        db.insert(1, sample_row(1)).expect("insert");
+        db.insert(1, &sample_row(1)).expect("insert");
     }
 
     // Flip one byte inside the first data page's region on disk, bypassing
@@ -156,7 +172,7 @@ fn buffer_pool_handles_a_database_larger_than_its_capacity() {
         let mut db = Database::create_with_capacity(&path, PageSize::DEFAULT, CAPACITY_PAGES)
             .expect("create with a deliberately small buffer pool");
         for i in 0..ROW_COUNT {
-            db.insert(i, sample_row(i))
+            db.insert(i, &sample_row(i))
                 .expect("insert under a small buffer pool");
         }
     }

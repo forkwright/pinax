@@ -144,6 +144,11 @@ fn encode_value(buf: &mut Vec<u8>, value: &Value, key: i64) -> Result<(), PinaxE
             buf.push(TAG_DATETIME);
             buf.extend_from_slice(&v.get().to_be_bytes());
         }
+        // WHY a wildcard at all: lexis::Value is #[non_exhaustive] (Decision
+        // 5 reserves room for later value types), so this cross-crate match
+        // must carry one even though every variant lexis currently defines
+        // is handled above.
+        _ => unreachable!("lexis::Value gained a variant Row::encode does not handle"), // INVARIANT: every lexis::Value variant defined today is matched above; this arm exists only to satisfy #[non_exhaustive]
     }
     Ok(())
 }

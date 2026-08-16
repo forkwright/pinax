@@ -120,6 +120,7 @@ fn encode_meta_slot(content: &MetaContent) -> Result<Vec<u8>, PinaxError> {
 /// WHY `pub(crate)`: `Database` (in `database.rs`) is the public entry
 /// point; the pager is an implementation detail the buffer pool sits on
 /// top of.
+#[derive(Debug)]
 pub(crate) struct Pager {
     file: File,
     path: PathBuf,
@@ -238,8 +239,7 @@ impl Pager {
 
         let (active_slot, content) = match (valid_a, valid_b) {
             (Some(a), Some(b)) if b.txn_id > a.txn_id => (1u8, b),
-            (Some(a), Some(_)) => (0u8, a),
-            (Some(a), None) => (0u8, a),
+            (Some(a), Some(_) | None) => (0u8, a),
             (None, Some(b)) => (1u8, b),
             (None, None) => NoValidMetaPageSnafu {
                 path: path.to_path_buf(),
@@ -311,7 +311,8 @@ impl Pager {
             .write_all_at(buf, self.file_offset(id))
             .context(IoSnafu {
                 path: self.path.clone(),
-            })
+            })?;
+        Ok(())
     }
 
     /// fsync data page writes. Called before a meta commit so the meta
@@ -319,7 +320,8 @@ impl Pager {
     pub(crate) fn sync_data(&self) -> Result<(), PinaxError> {
         self.file.sync_data().context(IoSnafu {
             path: self.path.clone(),
-        })
+        })?;
+        Ok(())
     }
 
     /// Commit a new tree state: fsync data, write the inactive meta slot

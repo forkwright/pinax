@@ -345,7 +345,7 @@ fn spill_if_needed(pool: &mut BufferPool, encoded: &[u8]) -> Result<(Vec<u8>, u3
         return Ok((encoded.to_vec(), 0));
     }
     let local = encoded.get(..max_local).context(BufferBoundsSnafu {
-        at: 0,
+        at: 0usize,
         len: max_local,
         buf_len: encoded.len(),
     })?;
@@ -394,6 +394,12 @@ fn reassemble(pool: &mut BufferPool, cell: &LeafCell) -> Result<Vec<u8>, PinaxEr
 // Path-copying mutation result and propagation.
 // ---------------------------------------------------------------------
 
+// WHY `Copy`: every field is a trivially-copyable primitive (`u32`/`i64`),
+// and `finalize_root` below consumes its `NodeResult` argument at each call
+// site's last use — `Copy` lets it take that argument by value without
+// clippy flagging an avoidable move, matching the by-value idiom Rust
+// prefers for small POD-shaped enums.
+#[derive(Clone, Copy)]
 enum NodeResult {
     Replaced(u32),
     Split {
@@ -535,7 +541,7 @@ fn split_interior_entries(
     let mid = keys.len() / 2;
     let promoted = *keys.get(mid).context(BufferBoundsSnafu {
         at: mid,
-        len: 1,
+        len: 1usize,
         buf_len: keys.len(),
     })?;
 
@@ -585,7 +591,7 @@ fn collapse_root_if_needed(pool: &mut BufferPool, root: u32) -> Result<u32, Pina
         return Ok(root);
     }
     if num_cells(&buf)? == 0 {
-        return Ok(interior_rightmost(&buf)?);
+        return interior_rightmost(&buf);
     }
     Ok(root)
 }
@@ -616,9 +622,9 @@ pub(crate) fn insert(pool: &mut BufferPool, key: i64, row: &Row) -> Result<u32, 
 
     let path = descend_path(pool, root, key)?;
     let leaf_id = *path.last().context(BufferBoundsSnafu {
-        at: 0,
-        len: 1,
-        buf_len: 0,
+        at: 0usize,
+        len: 1usize,
+        buf_len: 0usize,
     })?;
     let leaf_buf = pool.get(leaf_id)?;
     let insert_idx = match leaf_search(&leaf_buf, key)? {
@@ -704,9 +710,9 @@ fn leaf_split_with_new_cell(
     }
     let separator_key = read_i64(
         right_half.first().context(BufferBoundsSnafu {
-            at: 0,
-            len: 1,
-            buf_len: 0,
+            at: 0usize,
+            len: 1usize,
+            buf_len: 0usize,
         })?,
         0,
     )?;
@@ -761,9 +767,9 @@ pub(crate) fn update(pool: &mut BufferPool, key: i64, row: &Row) -> Result<u32, 
     }
     let path = descend_path(pool, root, key)?;
     let leaf_id = *path.last().context(BufferBoundsSnafu {
-        at: 0,
-        len: 1,
-        buf_len: 0,
+        at: 0usize,
+        len: 1usize,
+        buf_len: 0usize,
     })?;
     let leaf_buf = pool.get(leaf_id)?;
     let idx = match leaf_search(&leaf_buf, key)? {
@@ -805,9 +811,9 @@ pub(crate) fn delete(pool: &mut BufferPool, key: i64) -> Result<(u32, Row), Pina
     let max_local = pool.page_size().max_local();
     let path = descend_path(pool, root, key)?;
     let leaf_id = *path.last().context(BufferBoundsSnafu {
-        at: 0,
-        len: 1,
-        buf_len: 0,
+        at: 0usize,
+        len: 1usize,
+        buf_len: 0usize,
     })?;
     let leaf_buf = pool.get(leaf_id)?;
     let idx = match leaf_search(&leaf_buf, key)? {

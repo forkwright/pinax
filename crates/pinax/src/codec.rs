@@ -91,11 +91,6 @@ pub(crate) fn read_i64(buf: &[u8], at: usize) -> Result<i64, PinaxError> {
     Ok(i64::from_be_bytes(read_bytes::<8>(buf, at)?))
 }
 
-/// Write a big-endian `i64` without indexing.
-pub(crate) fn write_i64(buf: &mut [u8], at: usize, value: i64) -> Result<(), PinaxError> {
-    write_bytes(buf, at, &value.to_be_bytes())
-}
-
 /// Read `len` bytes starting at `at` into an owned, growable `Vec<u8>`
 /// without slicing — the runtime-length counterpart to
 /// [`read_bytes`]'s const-generic fixed length.
@@ -135,8 +130,14 @@ mod tests {
 
     #[test]
     fn i64_round_trips_negative() {
-        let mut buf = vec![0u8; 8];
-        write_i64(&mut buf, 0, -42).expect("in bounds");
+        // WHY built via `extend_from_slice` rather than a `write_i64`
+        // helper: no page write ever places an `i64` at a fixed offset
+        // into an existing buffer (row/cell encoding always appends to a
+        // growing `Vec` — see `row.rs`'s module docs), so `codec` has no
+        // `write_i64` to call; this test constructs the expected on-disk
+        // layout the same way production code does.
+        let mut buf = Vec::new();
+        buf.extend_from_slice(&(-42i64).to_be_bytes());
         assert_eq!(read_i64(&buf, 0).expect("in bounds"), -42);
     }
 

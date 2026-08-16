@@ -18,12 +18,13 @@ use std::collections::{HashMap, HashSet, VecDeque};
 
 use snafu::OptionExt as _;
 
-use crate::error::{PermanentError, PinaxError, PoolInvariantViolatedSnafu};
+use crate::error::{PinaxError, PoolInvariantViolatedSnafu};
 use crate::page::PageSize;
 use crate::pager::Pager;
 
 /// A capacity-bounded, LRU-evicting cache of page buffers sitting over a
 /// [`Pager`].
+#[derive(Debug)]
 pub(crate) struct BufferPool {
     pager: Pager,
     capacity: usize,
@@ -160,7 +161,7 @@ impl BufferPool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::error::FatalError;
+    use crate::error::{FatalError, PermanentError};
 
     fn pool_with_capacity(dir: &tempfile::TempDir, capacity: usize) -> BufferPool {
         let path = dir.path().join("db.pinax");

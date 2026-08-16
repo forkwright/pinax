@@ -70,7 +70,15 @@ pub(crate) const MAX_PAGE_SIZE: u32 = 65536;
 /// content (magic, version, page size, txn id, root, page count) is well
 /// under 100 bytes regardless of the configured data page size — makes
 /// bootstrap independent of the value it discovers.
-pub(crate) const META_SLOT_LEN: u64 = u64::from(MIN_PAGE_SIZE);
+///
+/// WHY a literal restatement of [`MIN_PAGE_SIZE`] rather than
+/// `u64::from(MIN_PAGE_SIZE)`: the widening `u32 -> u64` conversion is
+/// lossless, but `From`'s trait method is not yet usable inside a `const`
+/// initializer on this toolchain (rust-lang/rust#143874) — the same
+/// "restate rather than convert" reasoning [`CHECKSUM_LEN_U32`] and
+/// [`CHECKSUM_LEN_U16`] above already apply to sidestep a fallible/`as`
+/// conversion for a value that never changes independently of its source.
+pub(crate) const META_SLOT_LEN: u64 = 4096;
 
 /// Total file offset before the first data page begins.
 ///
@@ -181,16 +189,20 @@ impl Default for PageSize {
 }
 
 /// Compute the XxHash3-64 checksum over `buf[..buf.len() - CHECKSUM_LEN]`.
-pub(crate) fn compute_checksum(buf: &[u8]) -> Result<u64, PinaxError> {
+///
+/// WHY infallible: `buf.get(..content_len)` falls back to the whole buffer
+/// on a too-short slice rather than failing, and XxHash3 itself has no
+/// error path — there is no condition this function could report.
+pub(crate) fn compute_checksum(buf: &[u8]) -> u64 {
     let content_len = buf.len().saturating_sub(CHECKSUM_LEN);
     let content = buf.get(..content_len).unwrap_or(buf);
-    Ok(xxhash_rust::xxh3::xxh3_64(content))
+    xxhash_rust::xxh3::xxh3_64(content)
 }
 
 /// Stamp `buf`'s trailing [`CHECKSUM_LEN`] bytes with the checksum of
 /// everything before them.
 pub(crate) fn stamp_checksum(buf: &mut [u8]) -> Result<(), PinaxError> {
-    let checksum = compute_checksum(buf)?;
+    let checksum = compute_checksum(buf);
     let at = buf.len().saturating_sub(CHECKSUM_LEN);
     write_u64(buf, at, checksum)
 }
@@ -199,17 +211,17 @@ pub(crate) fn stamp_checksum(buf: &mut [u8]) -> Result<(), PinaxError> {
 /// checksum. Returns `Ok(())` on match, `Err` describing the mismatch
 /// otherwise. The caller attaches the page id.
 ///
-/// WHY `unwrap_or(0)` below is safe rather than a masked failure: the only
-/// way `read_u64`/`compute_checksum` fail is a buffer shorter than
-/// [`CHECKSUM_LEN`], which every page-sized buffer in this crate never is.
-/// Coalescing that unreachable case to `0` on both sides still produces the
-/// correct outcome (an undersized buffer reads as a checksum mismatch, not
-/// a silent pass) rather than requiring this function to propagate a
-/// `PinaxError` for a condition that cannot occur given how every caller
-/// constructs its buffers.
+/// WHY `unwrap_or(0)` below is safe rather than a masked failure:
+/// [`compute_checksum`] is infallible; only `read_u64` can fail here, and
+/// only on a buffer shorter than [`CHECKSUM_LEN`], which every page-sized
+/// buffer in this crate never is. Coalescing that unreachable case to `0`
+/// still produces the correct outcome (an undersized buffer reads as a
+/// checksum mismatch, not a silent pass) rather than requiring this
+/// function to propagate a `PinaxError` for a condition that cannot occur
+/// given how every caller constructs its buffers.
 pub(crate) fn verify_checksum(buf: &[u8]) -> Result<(), (u64, u64)> {
     let expected = read_u64(buf, buf.len().saturating_sub(CHECKSUM_LEN)).unwrap_or(0);
-    let actual = compute_checksum(buf).unwrap_or(0);
+    let actual = compute_checksum(buf);
     if expected == actual {
         Ok(())
     } else {

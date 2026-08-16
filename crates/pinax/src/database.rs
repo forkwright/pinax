@@ -97,8 +97,8 @@ impl Database {
     /// Returns [`crate::error::PermanentError::KeyAlreadyExists`] if `key`
     /// is already present, or a [`crate::error::FatalError`] variant on
     /// I/O or corruption.
-    pub fn insert(&mut self, key: i64, row: Row) -> Result<(), PinaxError> {
-        btree::insert(&mut self.pool, key, &row)?;
+    pub fn insert(&mut self, key: i64, row: &Row) -> Result<(), PinaxError> {
+        btree::insert(&mut self.pool, key, row)?;
         Ok(())
     }
 
@@ -121,8 +121,8 @@ impl Database {
     /// Returns [`crate::error::PermanentError::KeyNotFound`] if `key` is
     /// absent, or a [`crate::error::FatalError`] variant on I/O or
     /// corruption.
-    pub fn update(&mut self, key: i64, row: Row) -> Result<(), PinaxError> {
-        btree::update(&mut self.pool, key, &row)?;
+    pub fn update(&mut self, key: i64, row: &Row) -> Result<(), PinaxError> {
+        btree::update(&mut self.pool, key, row)?;
         Ok(())
     }
 
@@ -166,10 +166,10 @@ mod tests {
         let path = dir.path().join("db.pinax");
         let mut db = Database::create(&path, PageSize::DEFAULT).expect("create");
 
-        db.insert(1, row(1)).expect("insert");
+        db.insert(1, &row(1)).expect("insert");
         assert_eq!(db.get(1).expect("get").expect("present"), row(1));
 
-        db.update(1, row(2)).expect("update");
+        db.update(1, &row(2)).expect("update");
         assert_eq!(db.get(1).expect("get").expect("present"), row(2));
 
         let removed = db.delete(1).expect("delete");
@@ -183,8 +183,8 @@ mod tests {
         let path = dir.path().join("db.pinax");
         {
             let mut db = Database::create(&path, PageSize::DEFAULT).expect("create");
-            db.insert(1, row(1)).expect("insert");
-            db.insert(2, row(2)).expect("insert");
+            db.insert(1, &row(1)).expect("insert");
+            db.insert(2, &row(2)).expect("insert");
         }
         let mut reopened = Database::open(&path).expect("open");
         assert_eq!(reopened.get(1).expect("get").expect("present"), row(1));
@@ -204,7 +204,7 @@ mod tests {
         let path = dir.path().join("db.pinax");
         let mut db = Database::create(&path, PageSize::DEFAULT).expect("create");
         for k in [5, 1, 3, 2, 4] {
-            db.insert(k, row(k)).expect("insert");
+            db.insert(k, &row(k)).expect("insert");
         }
         let scanned: Vec<i64> = db
             .scan()
