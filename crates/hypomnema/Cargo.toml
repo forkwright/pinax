@@ -13,7 +13,7 @@ keywords = ["sql", "wal", "changelog"]
 categories = ["data-structures"]
 
 [dependencies]
-lexis = { path = "../lexis", version = "0.0.2" }
+lexis = { path = "../lexis", version = "0.0.3" }
 
 [lints]
 workspace = true
