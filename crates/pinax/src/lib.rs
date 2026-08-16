@@ -13,7 +13,7 @@
 //! let dir = tempfile::tempdir().expect("tempdir");
 //! let path = dir.path().join("example.pinax");
 //! let mut db = Database::create(&path, PageSize::DEFAULT)?;
-//! db.insert(1, Row::new(vec![Value::Text("hello".to_owned())]))?;
+//! db.insert(1, &Row::new(vec![Value::Text("hello".to_owned())]))?;
 //! assert!(db.get(1)?.is_some());
 //! # Ok(())
 //! # }
