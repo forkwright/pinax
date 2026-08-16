@@ -1,0 +1,86 @@
+# WHY: Block merges on known vulnerabilities and license/source/ban
+# violations. Runs `cargo audit` (RustSec DB), `cargo deny check`
+# (licenses, sources, bans, advisories), and OSV-Scanner on every PR and
+# daily against main so newly-published CVEs against existing deps are caught
+# even when no PR is open.
+name: Security
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  schedule:
+    # NOTE: Daily at 05:23 CST (11:23 UTC). Off-peak minute per global
+    # rule about avoiding :00/:30 cron schedules.
+    - cron: "23 11 * * *"
+  workflow_dispatch:
+
+# PROJECT: explicit top-level default deny; job-level permissions grant only what's needed
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  cargo-deny:
+    # WHY: checks licenses, banned crates, source registries, and the
+    # RustSec advisory DB using deny.toml ignore list. Any finding fails
+    # the job -- suppressions require a deny.toml entry with a WHY comment,
+    # not silent --ignore flags.
+    name: cargo deny
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false # PROJECT: security hardening -- never expose token to steps
+      - uses: EmbarkStudios/cargo-deny-action@bb137d7af7e4fb67e5f82a49c4fce4fad40782fe # v2.0.20
+        with:
+          # WHY: run every check explicitly so a schema regression in one
+          # section can't silently disable the others. cargo-deny expects
+          # the check subcommand followed by space-separated check names;
+          # `arguments:` passes post-subcommand flags only.
+          command: check advisories licenses bans sources
+          arguments: --all-features
+
+  cargo-audit:
+    # WHY: cargo-deny advisories check overlaps but uses a different code
+    # path; running cargo-audit independently protects against bugs or
+    # config drift disabling one of the two.
+    name: cargo audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@631a55b12751854ce901bb631d5902ceb48146f7 # stable
+      # WHY: install a prebuilt cargo-audit binary rather than source-building
+      # with this crate's pinned toolchain -- that decouples the scanner's
+      # MSRV (cargo-audit 0.22.2 requires Rust >=1.88) from the audited
+      # crate's MSRV. The exact scanner version is pinned and deliberately
+      # reviewed, never floated.
+      - uses: taiki-e/install-action@43aecc8d72668fbcfe75c31400bc4f890f1c5853 # v2.83.2
+        with:
+          tool: cargo-audit@0.22.2
+      - name: cargo audit
+        # WHY: -D unmaintained,unsound,yanked escalates those categories
+        # to errors (default is warning only). Suppressions go through
+        # deny.toml advisories.ignore entries -- no silent --ignore flags here.
+        run: cargo audit --deny unmaintained --deny unsound --deny yanked
+
+  osv-scanner:
+    name: osv scanner
+    uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@9a498708959aeaef5ef730655706c5a1df1edbc2
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    with:
+      scan-args: '--config=osv-scanner.toml --lockfile=Cargo.lock'

@@ -1,0 +1,70 @@
+# cargo-deny configuration for pinax.
+#
+# Template copied from forkwright/heurema; the advisory + license + ban +
+# sources policy mirrors the fleet baseline (kanon RUST.md § Dependencies).
+
+[graph]
+targets = []
+all-features = true
+
+[advisories]
+yanked = "deny"
+ignore = []
+
+[licenses]
+allow = [
+    "MPL-2.0",
+    "MIT",
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "Unicode-3.0",
+    "Unicode-DFS-2016",
+    "CC0-1.0",
+    "Zlib",
+    # WHY: pinax's own declared workspace licence (Cargo.toml
+    # `license = "LicenseRef-PolyForm-Shield-1.0.0"`). heurema is MPL-2.0
+    # and never needed this entry; kanon's deny.toml carries the same
+    # entry for the same reason and is the correct reference here.
+    "LicenseRef-PolyForm-Shield-1.0.0",
+]
+confidence-threshold = 0.92
+
+[bans]
+multiple-versions = "warn"
+wildcards = "deny"
+
+[[bans.deny]]
+crate = "openssl-sys"
+reason = "rustls is the fleet TLS choice; openssl-sys pulls system OpenSSL and complicates supply chain"
+
+# WHY: kanon RUST.md bans `thiserror` (replaced by snafu), `async-trait`
+# (native async fn in trait), `lazy_static` / `once_cell` (std::sync::LazyLock),
+# and `failure` (unmaintained). Applies fleet-wide.
+[[bans.deny]]
+crate = "thiserror"
+reason = "fleet errors use snafu (kanon RUST.md)"
+
+[[bans.deny]]
+crate = "async-trait"
+reason = "native async fn in trait since Rust 1.75 (kanon RUST.md)"
+
+[[bans.deny]]
+crate = "lazy_static"
+reason = "std::sync::LazyLock stabilized in 1.80 (kanon RUST.md)"
+
+[[bans.deny]]
+crate = "once_cell"
+reason = "std::sync::LazyLock stabilized in 1.80 (kanon RUST.md); this bans OUR code from depending on once_cell directly, not every transitive dependency's choice. once_cell reaches the workspace solely as a direct dependency of tempfile, via lexis's dev-dependency chain proptest -> tempfile -> once_cell; we do not control tempfile's dependency choices. `wrappers` scopes the exception to exactly that chain (once_cell is still denied everywhere else). Drop this exception once tempfile migrates off once_cell upstream, or if proptest's tempfile dependency is ever removed."
+wrappers = ["tempfile"]
+
+[[bans.deny]]
+crate = "failure"
+reason = "abandoned since 2019; use snafu (kanon RUST.md)"
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]

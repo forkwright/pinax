@@ -1,0 +1,9 @@
+# Shape declaration per ARCHITECTURE.md § Composition + D-036 Phase 1.
+# WHY: per-crate shape is the architectural commitment a future basanos rule
+# (ARCHITECTURE/crate-shape-mismatch — D-036 Phase 2) checks against. Left
+# unclassified: a durable shape is assigned by review, not invented per-crate
+# (CRATE-SHAPE.md § Registry Contract).
+shape = "unclassified"
+top_level = "leaf"
+within_crate = "feature"
+purpose = "Language of data: strict six-type value system, schema DDL, and query-expression AST vocabulary (Decision 5, Decision 14). Leaf crate — no fleet dependencies."

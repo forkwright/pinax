@@ -1,0 +1,9 @@
+# Shape declaration per ARCHITECTURE.md § Composition + D-036 Phase 1.
+# WHY: per-crate shape is the architectural commitment a future basanos rule
+# (ARCHITECTURE/crate-shape-mismatch — D-036 Phase 2) checks against. Left
+# unclassified: a durable shape is assigned by review, not invented per-crate
+# (CRATE-SHAPE.md § Registry Contract).
+shape = "unclassified"
+top_level = "layer"
+within_crate = "feature"
+purpose = "Facade: pager, buffer pool, B-tree, page format, SQL surface, async API, migration runner, CLI (Decision 14). Not yet implemented — reserves the workspace position."

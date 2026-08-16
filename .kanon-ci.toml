@@ -2,18 +2,9 @@
 # forge-only: false
 # spdx: LicenseRef-PolyForm-Shield-1.0.0
 
-# Pinax CI pipeline.
-#
-# Pinax is docs-only today (design phase) - no Cargo.toml, no
-# crates, nothing for the default Rust gate to exercise. The docs-phase
-# gate keeps CI honest with real checks that do not require a Rust
-# workspace: the canonical whole-repository lint, plus the README
-# writing check on top of it.
-#
-# The workspace lands at Phase 01 (pager / buffer pool / B-tree).
-# When code lands, replace `pipeline.stages` with the full Rust gate:
-#
-#     stages = ["cargo fmt", "cargo check", "cargo clippy", "cargo nextest", "kanon lint"]
+# NOTE: Pinax CI pipeline -- full Rust gate (fmt / check / clippy / nextest)
+# over the four-crate workspace, plus the repo-wide and README-prose kanon
+# lint passes.
 
 # WHY(#1) `kanon lint .` and not the two scoped commands it replaces: the
 # pipeline previously ran `kanon lint --workflow .kanon-ci.toml` and
@@ -23,8 +14,29 @@
 # least likely to have drifted and excluded the ones that had. The
 # whole-repo lint subsumes the workflow check; the README writing check stays
 # because `--writing` applies prose rules the default pass does not.
+#
+# WHY --jobs 8 / --build-jobs 8 --test-threads 8: kanon-ci concurrency caps
+# (basanos CI.md) -- the fleet budget for one CI run is ~25GB RSS; uncapped
+# cargo/nextest use host CPU count and can exceed it under parallel rustc
+# plus test workers.
 [pipeline]
-stages = ["repo-lint", "readme-lint"]
+stages = ["cargo fmt", "cargo check", "cargo clippy", "cargo nextest", "repo-lint", "readme-lint"]
+
+[stages."cargo fmt"]
+cmd = "cargo fmt --all -- --check"
+timeout_secs = 300
+
+[stages."cargo check"]
+cmd = "cargo check --workspace --all-targets --jobs 8"
+timeout_secs = 600
+
+[stages."cargo clippy"]
+cmd = "cargo clippy --workspace --all-targets --jobs 8 -- -D warnings"
+timeout_secs = 600
+
+[stages."cargo nextest"]
+cmd = "cargo nextest run --workspace --build-jobs 8 --test-threads 8"
+timeout_secs = 600
 
 [stages.repo-lint]
 cmd = "kanon lint ."
@@ -34,9 +46,7 @@ timeout_secs = 120
 cmd = "kanon lint --writing README.md"
 timeout_secs = 30
 
-# WHY disabled: the independent verifier's default build probe
-# (`cargo check --all-features --tests`) fails structurally against a
-# repo with no Cargo workspace and reports a false divergence.
-# Re-enable when the pipeline grows real Rust stages to reproduce.
-[verifier]
-enabled = false
+# NOTE: [verifier] omitted -- the workspace now exists, so the independent
+# verifier's default build probe reproduces cleanly; the prior explicit
+# `enabled = false` (docs-only repo, no Cargo workspace to probe) no longer
+# applies. Absent section defaults to enabled per basanos VerifierConfig.

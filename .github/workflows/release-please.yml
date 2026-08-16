@@ -23,4 +23,9 @@ permissions:
 
 jobs:
   call:
-    uses: forkwright/.github/.github/workflows/release-please.yml@main
+    # WHY pinned to a commit SHA, not @main: a mutable branch ref lets the
+    # remote workflow's behavior change under an already-merged pinax
+    # commit. Refresh via:
+    #   gh api repos/forkwright/.github/commits/main --jq '.sha'
+    # and review the diff at forkwright/.github before bumping.
+    uses: forkwright/.github/.github/workflows/release-please.yml@df92942bcc41cc7ffd0339b75b2f01e52269d0ef # main

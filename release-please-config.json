@@ -17,7 +17,34 @@
   ],
   "packages": {
     ".": {
-      "changelog-path": "CHANGELOG.md"
+      "changelog-path": "CHANGELOG.md",
+      "extra-files": [
+        {
+          "type": "toml",
+          "path": "Cargo.toml",
+          "jsonpath": "$.workspace.package.version"
+        },
+        {
+          "type": "toml",
+          "path": "crates/hypomnema/Cargo.toml",
+          "jsonpath": "$.dependencies[?(@.path)].version"
+        },
+        {
+          "type": "toml",
+          "path": "crates/phylaxis/Cargo.toml",
+          "jsonpath": "$.dependencies[?(@.path)].version"
+        },
+        {
+          "type": "toml",
+          "path": "crates/pinax/Cargo.toml",
+          "jsonpath": "$.dependencies[?(@.path)].version"
+        },
+        {
+          "type": "toml",
+          "path": "Cargo.lock",
+          "jsonpath": "$.package[?(!@.source)].version"
+        }
+      ]
     }
   }
 }
