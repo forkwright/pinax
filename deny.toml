@@ -24,6 +24,13 @@ allow = [
     "Unicode-DFS-2016",
     "CC0-1.0",
     "Zlib",
+    # WHY: xxhash-rust (Decision 2's page checksum algorithm, PLAN.md) is
+    # BSL-1.0 -- OSI-approved and FSF Free/Libre per cargo-deny's own
+    # license database, permissive in the same class as MIT/Apache-2.0,
+    # just not one of the handful the heurema-derived template above
+    # enumerated. Not adding this let `cargo deny check licenses` reject
+    # pinax's own load-bearing checksum dependency.
+    "BSL-1.0",
     # WHY: pinax's own declared workspace licence (Cargo.toml
     # `license = "LicenseRef-PolyForm-Shield-1.0.0"`). heurema is MPL-2.0
     # and never needed this entry; kanon's deny.toml carries the same

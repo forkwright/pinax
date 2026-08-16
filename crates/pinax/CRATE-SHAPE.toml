@@ -6,4 +6,4 @@
 shape = "unclassified"
 top_level = "layer"
 within_crate = "feature"
-purpose = "Facade: pager, buffer pool, B-tree, page format, SQL surface, async API, migration runner, CLI (Decision 14). Not yet implemented — reserves the workspace position."
+purpose = "Facade: pager, buffer pool, B-tree, page format land Phase 01 (Decision 1, Decision 2). SQL surface, async API, migration runner, CLI (Decision 14) land later phases."

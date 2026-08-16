@@ -30,10 +30,38 @@ STORAGE/no-migration-checksum:crates/lexis/src/ast.rs
 STORAGE/no-migration-checksum:crates/lexis/src/lib.rs
 
 # =============================================================================
-# crates/{hypomnema,phylaxis,pinax}/ — genuinely empty scaffolds
+# crates/pinax/ — Phase 01 landed; false positives, not real defects
 # =============================================================================
 
-# WHY: these three crates are empty by design at this phase — lib.rs is
+# WHY(forkwright/kanon#2975): same has_ddl bare-substring-match false
+# positive as the lexis entries above, same root cause, same upstream fix
+# tracked there. `database.rs`'s module doc names "CREATE TABLE" as Phase
+# 04 territory this facade does not implement yet (Decision 1: "one file
+# per database" today, no table catalog); `row.rs`'s module doc cites
+# `lexis`'s own exit-criterion wording, which likewise names "CREATE TABLE"
+# only to say the typed-row/`TableDef` format it gates is Phase 4/5
+# territory. Neither file runs a migration or executes DDL. Drop these two
+# entries once kanon#2975 lands.
+STORAGE/no-migration-checksum:crates/pinax/src/database.rs
+STORAGE/no-migration-checksum:crates/pinax/src/row.rs
+
+# WHY: lib.rs is a module-declaration + public re-export file with no
+# behavior of its own — same shape as the lexis/lib.rs entry above, not the
+# "empty scaffold" reason the hypomnema/phylaxis entries below still carry.
+# Phase 01 landed real behavior in `btree/`, `buffer_pool.rs`, `codec.rs`,
+# `database.rs`, `page.rs`, `pager.rs`, and `row.rs`, each with its own
+# colocated `#[cfg(test)] mod tests`; the TESTING/no-tests heuristic only
+# inspects lib.rs itself and a sibling `tests/` directory (which exists here
+# too — `tests/phase01_acceptance.rs` — but the heuristic still cannot see
+# module-level coverage), so it cannot see any of that. Drop once the
+# heuristic learns to walk sibling submodules.
+TESTING/no-tests:crates/pinax/src/lib.rs
+
+# =============================================================================
+# crates/{hypomnema,phylaxis}/ — genuinely empty scaffolds
+# =============================================================================
+
+# WHY: these two crates are empty by design at this phase — lib.rs is
 # module-doc-comment-only, zero functions, zero types, zero logic (see each
 # crate's [package.metadata.kanon] maturity = "scaffold" in Cargo.toml). A
 # #[cfg(test)] module here would have no real behavior to assert against;
@@ -42,9 +70,7 @@ STORAGE/no-migration-checksum:crates/lexis/src/lib.rs
 # is worse than an honest, exit-criteria-bound suppression. Each crate's own
 # Cargo.toml exit-criteria field names the concrete Phase that ends this:
 # hypomnema Phase 02 (WAL + virtual-WAL trait + causal changelog), phylaxis
-# Phase 03/06 (MVCC + encryption), pinax Phase 01 (pager + buffer pool +
-# B-tree) — see kanon/projects/pinax/ROADMAP.md. Drop each entry the moment
-# its crate gets real behavior and a real test.
+# Phase 03/06 (MVCC + encryption) — see kanon/projects/pinax/ROADMAP.md.
+# Drop each entry the moment its crate gets real behavior and a real test.
 TESTING/no-tests:crates/hypomnema/src/lib.rs
 TESTING/no-tests:crates/phylaxis/src/lib.rs
-TESTING/no-tests:crates/pinax/src/lib.rs
