@@ -24,6 +24,11 @@ allow = [
     "Unicode-DFS-2016",
     "CC0-1.0",
     "Zlib",
+    # WHY: pinax's own declared workspace licence (Cargo.toml
+    # `license = "LicenseRef-PolyForm-Shield-1.0.0"`). heurema is MPL-2.0
+    # and never needed this entry; kanon's deny.toml carries the same
+    # entry for the same reason and is the correct reference here.
+    "LicenseRef-PolyForm-Shield-1.0.0",
 ]
 confidence-threshold = 0.92
 
@@ -52,7 +57,8 @@ reason = "std::sync::LazyLock stabilized in 1.80 (kanon RUST.md)"
 
 [[bans.deny]]
 crate = "once_cell"
-reason = "std::sync::LazyLock stabilized in 1.80 (kanon RUST.md)"
+reason = "std::sync::LazyLock stabilized in 1.80 (kanon RUST.md); this bans OUR code from depending on once_cell directly, not every transitive dependency's choice. once_cell reaches the workspace solely as a direct dependency of tempfile, via lexis's dev-dependency chain proptest -> tempfile -> once_cell; we do not control tempfile's dependency choices. `wrappers` scopes the exception to exactly that chain (once_cell is still denied everywhere else). Drop this exception once tempfile migrates off once_cell upstream, or if proptest's tempfile dependency is ever removed."
+wrappers = ["tempfile"]
 
 [[bans.deny]]
 crate = "failure"
