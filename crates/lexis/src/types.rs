@@ -55,7 +55,6 @@ impl SqlType {
     ///
     /// Returns [`LexisError::IncomparableTypes`] if `self` and `other` are
     /// different types other than the `Integer`/`Real` pairing.
-    #[must_use]
     pub fn check_comparable(self, other: Self) -> Result<(), LexisError> {
         let compatible = self == other
             || matches!(

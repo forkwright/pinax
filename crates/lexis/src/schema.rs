@@ -82,7 +82,6 @@ impl ColumnDef {
     ///
     /// Returns [`LexisError::TextMaxLenOnNonText`] if `text_max_len` is
     /// `Some` and `sql_type` is not [`SqlType::Text`].
-    #[must_use]
     pub fn new(
         name: ColumnName,
         sql_type: SqlType,
@@ -145,7 +144,6 @@ impl ColumnDef {
     /// Returns [`LexisError::TextTooLong`] if `value` is `TEXT`, this
     /// column declares a `text_max_len`, and the value's character count
     /// exceeds it.
-    #[must_use]
     pub fn check_value(&self, value: &Value) -> Result<(), LexisError> {
         let actual_type = match value {
             Value::Null => {
@@ -217,7 +215,6 @@ impl TableDef {
     ///
     /// Returns [`LexisError::DuplicateColumn`] if any two columns share a
     /// name.
-    #[must_use]
     pub fn new(name: TableName, columns: Vec<ColumnDef>) -> Result<Self, LexisError> {
         ensure!(
             !columns.is_empty(),
