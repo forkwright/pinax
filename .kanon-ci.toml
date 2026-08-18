@@ -1,6 +1,6 @@
 # archetype: B
 # forge-only: false
-# spdx: LicenseRef-PolyForm-Shield-1.0.0
+# spdx: LicenseRef-PolyForm-Noncommercial-1.0.0
 
 # NOTE: Pinax CI pipeline -- full Rust gate (fmt / check / clippy / nextest)
 # over the four-crate workspace, plus the repo-wide and README-prose kanon
