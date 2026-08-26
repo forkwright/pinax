@@ -31,11 +31,12 @@ allow = [
     # enumerated. Not adding this let `cargo deny check licenses` reject
     # pinax's own load-bearing checksum dependency.
     "BSL-1.0",
-    # WHY: pinax's own declared workspace licence (Cargo.toml
-    # `license = "LicenseRef-PolyForm-Shield-1.0.0"`). heurema is MPL-2.0
-    # and never needed this entry; kanon's deny.toml carries the same
-    # entry for the same reason and is the correct reference here.
+    # WHY: fleet posture rendering can emit either PolyForm licence or the
+    # proprietary LicenseRef. Cargo rejects unknown identifiers unless
+    # cargo-deny knows them, even though pinax itself is Noncommercial.
     "LicenseRef-PolyForm-Shield-1.0.0",
+    "LicenseRef-PolyForm-Noncommercial-1.0.0",
+    "LicenseRef-Proprietary",
 ]
 confidence-threshold = 0.92
 

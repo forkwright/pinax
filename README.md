@@ -45,5 +45,5 @@ First production migration target: harmonia's `apotheke` crate.
 
 ## License
 
-PolyForm Shield 1.0.0 (code) - see [LICENSE](LICENSE). Documentation
+PolyForm Noncommercial 1.0.0 (code) - see [LICENSE](LICENSE). Documentation
 under CC BY-NC-ND 4.0 - see [LICENSE-DOCS](LICENSE-DOCS).
