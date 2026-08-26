@@ -1,13 +1,14 @@
 ---
-scope: pinax repo conventions (design-phase relational storage engine)
+scope: pinax repo conventions (relational storage engine; Phase 01 implemented)
 defers_to: kanon standards for universal engineering policy
-tightens: design-phase-only: no crates land ahead of the Phase 01 plan
+tightens: no crates land ahead of the roadmap's current phase (kanon projects/pinax/ROADMAP.md)
 ---
 
 # AGENTS.md - pinax
 
-Design-phase repo: documentation only. The buildable workspace lands
-with Phase 01 (pager / buffer pool / B-tree).
+Phase 01 (pager / buffer pool / B-tree) is implemented, in lexis and
+pinax. hypomnema and phylaxis reserve their workspace position for
+later phases.
 
 ## Rules
 
