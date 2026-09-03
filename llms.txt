@@ -1,6 +1,6 @@
 # pinax
 
-> Relational storage engine for the forkwright fleet - design phase, no code yet.
+> Relational storage engine for the forkwright fleet. Four-crate workspace - lexis and pinax implement Phase 01 (pager / buffer pool / B-tree); hypomnema and phylaxis reserve their workspace position for later phases.
 
 ## Architecture
 

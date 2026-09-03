@@ -8,7 +8,7 @@ Expected response: acknowledgement within 72 hours. No bug bounty program.
 
 ## Scope
 
-Pinax is in the design phase. No implementation code has landed. Security reports on the design itself (threat model gaps, missing requirements, unsafe architectural choices) are in scope and welcome.
+Phase 01 has landed: lexis (the six-type value system) and pinax (pager, buffer pool, B+tree) ship implementation code; hypomnema and phylaxis remain empty crates reserving their workspace position for later phases. Security reports against shipped implementation code (memory safety, data corruption, and - once those phases land - encryption and auth) are in scope, as are reports against the design itself (threat model gaps, missing requirements, unsafe architectural choices).
 
 ## Disclosure
 

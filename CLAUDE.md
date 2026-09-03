@@ -1,21 +1,23 @@
 <!--
-scope: pinax repo conventions (design-phase relational storage engine; workspace lands with Phase 01)
+scope: pinax repo conventions (relational storage engine; Phase 01 implemented)
 defers_to: kanon standards for universal engineering policy
-tightens: design-phase-only until Phase 01 (pager / buffer pool / B-tree); planning lives in kanon projects/pinax, not here
+tightens: no crates land ahead of the roadmap's current phase; planning lives in kanon projects/pinax, not here
 -->
 
 # CLAUDE.md - pinax
 
 ## At a glance
 
-Design-phase repo for the fleet's relational storage engine. No code
-yet - the tree is documentation and scaffold. Do not add crates here
-without the Phase 01 plan in hand.
+Fleet relational storage engine. Four-crate workspace (lexis,
+hypomnema, phylaxis, pinax); Phase 01 (pager / buffer pool / B-tree)
+is implemented, in lexis and pinax. hypomnema and phylaxis reserve
+their workspace position for later phases. Do not add crates here
+without the current phase's plan in hand.
 
 ## Standards
 
 Fleet standards come from forkwright/kanon `crates/basanos/standards/`.
-Most relevant once code lands: RUST.md, STORAGE.md, STORAGE-TIERS.md,
+Apply now that code has landed: RUST.md, STORAGE.md, STORAGE-TIERS.md,
 CRATE-SHAPE.md.
 
 ## Planning

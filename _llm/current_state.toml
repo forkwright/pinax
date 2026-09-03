@@ -5,5 +5,5 @@ generated = false
 source_docs = ["README.md"]
 
 [state]
-summary = "Design-phase repo; specification is the active phase. Authoritative state tracking lives in the fleet planning home (forkwright/kanon projects/pinax)."
-current_phase = "Phase 0: specification"
+summary = "Phase 01 (pager / buffer pool / B-tree) implemented in lexis and pinax; hypomnema and phylaxis reserve their workspace position for later phases. Authoritative state tracking lives in the fleet planning home (forkwright/kanon projects/pinax)."
+current_phase = "Phase 01: pager / buffer pool / B-tree"
