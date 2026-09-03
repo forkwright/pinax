@@ -103,7 +103,7 @@ fn too_large_as_u32(len: usize, key: i64) -> Result<u32, PinaxError> {
         source: PermanentError::PayloadTooLarge {
             key,
             encoded_len: len,
-            location: snafu::Location::new(file!(), line!(), column!()),
+            location: snafu::location!(),
         },
     })
 }
@@ -112,7 +112,7 @@ fn invalid_encoding(reason: &'static str) -> PinaxError {
     PinaxError::Fatal {
         source: FatalError::InvalidRowEncoding {
             reason,
-            location: snafu::Location::new(file!(), line!(), column!()),
+            location: snafu::location!(),
         },
     }
 }

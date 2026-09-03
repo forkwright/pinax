@@ -307,7 +307,7 @@ impl Pager {
                 page_id: id,
                 expected,
                 actual,
-                location: snafu::Location::new(file!(), line!(), column!()),
+                location: snafu::location!(),
             },
         })?;
         Ok(buf)
