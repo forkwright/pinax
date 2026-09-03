@@ -40,7 +40,7 @@ jobs:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false # PROJECT: security hardening -- never expose token to steps
-      - uses: EmbarkStudios/cargo-deny-action@bb137d7af7e4fb67e5f82a49c4fce4fad40782fe # v2.0.20
+      - uses: EmbarkStudios/cargo-deny-action@3c6349835b2b7b196a839186cb8b78e02f7b5f25 # v2.1.1
         with:
           # WHY: run every check explicitly so a schema regression in one
           # section can't silently disable the others. cargo-deny expects
@@ -66,7 +66,7 @@ jobs:
       # MSRV (cargo-audit 0.22.2 requires Rust >=1.88) from the audited
       # crate's MSRV. The exact scanner version is pinned and deliberately
       # reviewed, never floated.
-      - uses: taiki-e/install-action@43aecc8d72668fbcfe75c31400bc4f890f1c5853 # v2.83.2
+      - uses: taiki-e/install-action@1ed6d7be6168f6c9046541087ff549b6bc581fdf # v2.87.2
         with:
           tool: cargo-audit@0.22.2
       - name: cargo audit
@@ -77,7 +77,7 @@ jobs:
 
   osv-scanner:
     name: osv scanner
-    uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@9a498708959aeaef5ef730655706c5a1df1edbc2
+    uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@6e4298ebc4db23e847df9b2e2de2939d6f066c67
     permissions:
       actions: read
       contents: read
