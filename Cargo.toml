@@ -30,7 +30,7 @@ proptest = "1"
 # manifest, matching kanon's own workspace convention, because that is what
 # lets ARCHITECTURE/crate-index-conformance read real `path =` edges out of
 # each crate's Cargo.toml and cross-check them against CRATE-INDEX.toml.
-snafu = "0.8"
+snafu = "0.9"
 # WHY: pinax's page-format checksum per PLAN.md Decision 2 — pure-Rust
 # XxHash3-64, the same algorithm Turso's page cache uses
 # (`turso/core/storage/checksum.rs:81`), chosen over CRC32C (32-bit is

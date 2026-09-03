@@ -263,7 +263,7 @@ mod tests {
         let err = PinaxError::Permanent {
             source: PermanentError::KeyNotFound {
                 key: 7,
-                location: snafu::Location::new(file!(), line!(), column!()),
+                location: snafu::location!(),
             },
         };
         assert_eq!(err.to_string(), "key 7 does not exist");
@@ -276,7 +276,7 @@ mod tests {
                 page_id: 3,
                 expected: 1,
                 actual: 2,
-                location: snafu::Location::new(file!(), line!(), column!()),
+                location: snafu::location!(),
             },
         };
         assert!(err.to_string().contains("page 3 failed checksum"));
