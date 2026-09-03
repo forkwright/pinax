@@ -13,9 +13,9 @@ keywords = ["sql", "database", "storage"]
 categories = ["database"]
 
 [dependencies]
-hypomnema = { path = "../hypomnema", version = "0.0.3" }
-lexis = { path = "../lexis", version = "0.0.3" }
-phylaxis = { path = "../phylaxis", version = "0.0.3" }
+hypomnema = { path = "../hypomnema", version = "0.0.4" }
+lexis = { path = "../lexis", version = "0.0.4" }
+phylaxis = { path = "../phylaxis", version = "0.0.4" }
 snafu = { workspace = true }
 xxhash-rust = { workspace = true }
 

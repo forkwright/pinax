@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.4](https://github.com/forkwright/pinax/compare/v0.0.3...v0.0.4) (2026-08-26)
+
+
+### Bug Fixes
+
+* **license:** converge the metadata on the licence pinax actually ships ([#17](https://github.com/forkwright/pinax/issues/17)) ([a238fea](https://github.com/forkwright/pinax/commit/a238fea7dc2afb8129c0b1c93fbc30de46e17510))
+
 ## [0.0.3](https://github.com/forkwright/pinax/compare/v0.0.2...v0.0.3) (2026-08-16)
 
 
