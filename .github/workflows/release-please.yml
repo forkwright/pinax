@@ -23,9 +23,14 @@ permissions:
 
 jobs:
   call:
-    # WHY pinned to a commit SHA, not @main: a mutable branch ref lets the
-    # remote workflow's behavior change under an already-merged pinax
-    # commit. Refresh via:
-    #   gh api repos/forkwright/.github/commits/main --jq '.sha'
-    # and review the diff at forkwright/.github before bumping.
-    uses: forkwright/.github/.github/workflows/release-please.yml@df92942bcc41cc7ffd0339b75b2f01e52269d0ef # main
+    # WHY @main, not pinned: the concern behind the old SHA pin was real -- a
+    # mutable branch ref lets the remote workflow's behavior change under an
+    # already-merged pinax commit with no local diff to review. But its
+    # mitigation was the manual refresh procedure this comment used to cite,
+    # and nobody ran it: forkwright/.github publishes no tags, so dependabot
+    # never bumps this pin either, and the SHA just froze -- this file sat 10
+    # days behind main. forkwright/.github is first-party -- same org, same
+    # trust boundary -- not the third-party supply-chain case a SHA pin
+    # defends against, and a floating ref can't go stale the way a
+    # hand-refreshed one did.
+    uses: forkwright/.github/.github/workflows/release-please.yml@main
