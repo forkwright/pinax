@@ -13,8 +13,8 @@ keywords = ["sql", "mvcc", "encryption"]
 categories = ["data-structures"]
 
 [dependencies]
-hypomnema = { path = "../hypomnema", version = "0.0.3" }
-lexis = { path = "../lexis", version = "0.0.3" }
+hypomnema = { path = "../hypomnema", version = "0.0.4" }
+lexis = { path = "../lexis", version = "0.0.4" }
 
 [lints]
 workspace = true
