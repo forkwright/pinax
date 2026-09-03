@@ -19,7 +19,7 @@ authors = ["forkwright"]
 [workspace.dependencies]
 # WHY: fleet-preferred small-string type for validated identifier newtypes
 # (kanon RUST.md § Validation constructors canonical example).
-compact_str = "0.9"
+compact_str = "0.10"
 # WHY: property-based testing for the type system's validated constructors
 # (kanon RUST.md § Testing).
 proptest = "1"
