@@ -1,26 +1,89 @@
+# WHY this repo moved off the org-default trailer-only reusable: that reusable
+# verifies a `Gate-Passed` trailer and nothing else, so a PR without one could
+# never produce a passing required check -- and the trailer is minted by a full
+# local gate, which needs a build box the fleet does not currently declare. The
+# gate was therefore unsatisfiable rather than strict. hybrid-gate keeps the
+# trailer as a fast path and falls through to a real fmt/check/clippy/nextest
+# build on a hosted runner when there is none.
+#
+# WARNING: this file's job id is `gate`, not `call`. Branch protection pins
+# required contexts BY NAME, so `call / gate-attestation` can never report again
+# once this lands and `gate / gate` had never reported before it. The two were
+# swapped in required_status_checks as part of the same change. Renaming a job
+# here without that swap strands every future PR against a context that cannot
+# exist -- which is exactly how politeia's main became unmergeable.
 name: Gate Attestation
 
 on:
   pull_request:
     branches: [main]
+  # WHY a push trigger and not just pull_request: a squash merge does not
+  # carry the source commits' trailers, so no commit on main has a
+  # Gate-Passed trailer -- check-trailer finds none and routes to
+  # full-gate-build, which is the job that actually compiles the workspace.
+  # Without this nothing ever builds main, and the first PR to inherit a
+  # merged break is what discovers it (forkwright/theatron#235).
+  push:
+    branches: [main]
 
-# WHY: the reusable declares `contents: read` for its own job, but the caller
-# controls the token the reusable receives. Declaring it here keeps the grant
-# explicit at the boundary that actually decides it.
 permissions:
   contents: read
 
-# WHY: the reusable declares no concurrency group, so without this a rapid
-# re-push leaves the superseded run to completion against a SHA nothing checks.
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+# WHY no concurrency: block here: hybrid-gate.yml itself already declares
+# `concurrency: group: ${{ github.workflow }}-${{ github.ref }}` and its own
+# comment states callers must NOT also set a concurrency group with that
+# same key, or the shared group self-cancels. pinax's PRIOR file set this
+# exact key -- dropped here, not carried forward, for that reason.
 
 jobs:
-  call:
-    # WHY pinned to a commit SHA, not @main: a mutable branch ref lets the
-    # remote workflow's behavior change under an already-merged pinax
-    # commit. Refresh via:
-    #   gh api repos/forkwright/.github/commits/main --jq '.sha'
-    # and review the diff at forkwright/.github before bumping.
-    uses: forkwright/.github/.github/workflows/gate-attestation.yml@df92942bcc41cc7ffd0339b75b2f01e52269d0ef # main
+  gate:
+    # WHY @main, not a pinned SHA: forkwright/.github publishes no tags, so a
+    # SHA pin here has no dependabot bump path and just freezes. forkwright/
+    # .github is first-party -- same org, same trust boundary -- not the
+    # third-party supply-chain case a SHA pin defends against. (pinax's PRIOR
+    # file pinned the OLD reusable by SHA with the opposite rationale; the
+    # two more-recently-migrated repos, koinon and sphragis, both moved to
+    # @main -- followed here for consistency with the current pattern.)
+    uses: forkwright/.github/.github/workflows/hybrid-gate.yml@main
+    with:
+      fmt_cmd: "cargo fmt --all -- --check"
+      check_cmd: "cargo check --workspace --all-targets"
+      clippy_cmd: "cargo clippy --workspace --all-targets -- -D warnings"
+      nextest_cmd: "cargo nextest run --workspace"
+      # WHY set: nextest does not execute doctests (ci.yml's own inline NOTE
+      # says so); this keeps the doctest coverage ci.yml's separate
+      # `cargo test --workspace --doc` step already exercises.
+      doctest_cmd: "cargo test --workspace --doc"
+      # WHY explicit "stable" rather than leaving this empty: hybrid-gate.yml
+      # auto-detects the toolchain from the caller's own rust-toolchain.toml
+      # when this input is empty -- the fleet convention per its own input
+      # description and forkwright/harmonia CLAUDE.md ("Toolchain comes from
+      # rust-toolchain.toml, never workflow inputs"). pinax carries NO
+      # rust-toolchain.toml at its root (verified: 404 on
+      # contents/rust-toolchain.toml) -- unlike koinon and sphragis, which
+      # both leave this empty because they DO have one. Leaving it empty here
+      # would hand toolchain selection to whatever setup-rust-toolchain
+      # defaults to absent any file, an unpinned behavior this repo's own
+      # ci.yml avoids today by pinning `dtolnay/rust-toolchain@... # stable`
+      # explicitly. "stable" matches that existing behavior exactly.
+      # RECOMMENDATION (separate from this migration): add a
+      # rust-toolchain.toml at the repo root (workspace.package.rust-version
+      # = "1.94" is already the declared MSRV) so this input can drop back to
+      # empty and the pin lives in one place per fleet convention, the way
+      # koinon and sphragis already do.
+      rust_toolchain: "stable"
+      # WHY empty: pinax's only third-party dependencies are pure-Rust crates
+      # (compact_str, proptest, snafu, xxhash-rust, tempfile) -- verified
+      # against workspace.dependencies in Cargo.toml. No C-binding crate, so
+      # no apt package is needed.
+      system_packages: ""
+      # WHY false: no `git = "https://github.com/forkwright/..."` entry
+      # anywhere in Cargo.toml or any crates/*/Cargo.toml -- verified by
+      # direct read of all four manifests. Every cross-crate edge
+      # (hypomnema -> lexis; phylaxis -> hypomnema, lexis; pinax -> all
+      # three) is a local `{ path = "..." }` pin within this one workspace.
+      needs_fleet_repo_token: false
+      rust_cache_key: "gate-attestation"
+      ai_attribution_check: true
+      docs_only_exemption: true
+    secrets: inherit

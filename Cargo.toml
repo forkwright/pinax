@@ -8,10 +8,10 @@ members = [
 ]
 
 [workspace.package]
-version = "0.0.3"
+version = "0.0.4"
 edition = "2024"
 rust-version = "1.94"
-license = "LicenseRef-PolyForm-Shield-1.0.0"
+license = "LicenseRef-PolyForm-Noncommercial-1.0.0"
 homepage = "https://github.com/forkwright/pinax"
 repository = "https://github.com/forkwright/pinax"
 authors = ["forkwright"]
