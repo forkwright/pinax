@@ -66,7 +66,7 @@ jobs:
       # MSRV (cargo-audit 0.22.2 requires Rust >=1.88) from the audited
       # crate's MSRV. The exact scanner version is pinned and deliberately
       # reviewed, never floated.
-      - uses: taiki-e/install-action@1ed6d7be6168f6c9046541087ff549b6bc581fdf # v2.87.2
+      - uses: taiki-e/install-action@d438492cf8a250514fa2d34b30bc3c0dc37c65ff # v2.87.8
         with:
           tool: cargo-audit@0.22.2
       - name: cargo audit
